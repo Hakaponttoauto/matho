@@ -13,10 +13,10 @@
 
 <div id="container">
     <div id="console-container">
-        <div class="latex-row" id="refresh" onclick="setFocus(this);"></div>
+        <div class="latex-row" id="refresh" onclick="setFocus(this);"><div class="mathcont"></div><span role="textbox" spellcheck="false" class="note" contenteditable onclick="event.stopPropagation()"></span></div>
     </div>
 </div>
-<input type="text" id="math-input" oninput="updateLatex()">
+<input type="text" id="math-input" oninput="updateLatex()" placeholder="Kirjoita Latexia..." autofocus>
 
 <script src="app.js"></script>
 

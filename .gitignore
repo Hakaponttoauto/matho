@@ -1,1 +1,7 @@
 node_modules
+matho-win32-x64
+session.html
+windows_installer
+build_installer.js
+
+out/

@@ -16,10 +16,30 @@ function createWindow () {
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile('app/index.html')
+  mainWindow.loadFile('app/index.html');
+  mainWindow.setIcon(path.join(__dirname, '/icon.png'));
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+}
+
+function createDisplay () {
+   // Create the browser window.
+   const displayWindow = new BrowserWindow({
+     width: 500,
+     height: 600,
+     webPreferences: {
+       preload: path.join(__dirname, 'preload.js'),
+       nodeIntegration: true,
+       contextIsolation: false,
+       enableRemoteModule: true,
+     }
+   })
+ 
+   // and load the index.html of the app.
+   displayWindow.loadFile('app/display.html');
+   //displayWindow.removeMenu();
+   displayWindow.setIcon(path.join(__dirname, '/icon.png'));
 }
 
 const template = [
@@ -33,8 +53,17 @@ const template = [
           }
        },
        {
-          label: 'Tallenna'
-       }
+          label: 'Avaa',
+          click: (item, mainWindow) => {
+            mainWindow.webContents.send('command', 'load');
+          }
+       },
+       {
+         label: 'Tallenna',
+         click: (item, mainWindow) => {
+            mainWindow.webContents.send('command', 'save');
+          }
+      }
     ]
   },
   {
@@ -63,6 +92,13 @@ const template = [
   {
     label: 'Näytä',
     submenu: [
+      {
+         label: "Esikatsele tallennusta",
+         click: (item, mainWindow) => {
+            mainWindow.webContents.send('command', 'save');
+            createDisplay();
+          }
+      },
        {
           role: 'reload'
        },
@@ -75,6 +111,14 @@ const template = [
       label: 'Ikkuna',
      role: 'window',
      submenu: [
+         {
+            label: 'Pidä päällimmäisenä',
+            type: 'checkbox',
+            click: (item, mainWindow) => {
+               mainWindow.setAlwaysOnTop(!mainWindow.isAlwaysOnTop()); 
+            }
+
+         },
         {
            role: 'minimize'
         },
@@ -90,7 +134,6 @@ const template = [
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
-  
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.

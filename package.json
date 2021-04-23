@@ -5,17 +5,46 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron-forge start",
+    "build": "electron-packager . --overwrite",
+    "make": "electron-forge make",
+    "package": "electron-forge package"
   },
-  "author": "Aeromattier Development",
+  "author": "Hakaponttoauto",
   "license": "ISC",
   "dependencies": {
-    "electron": "^12.0.5",
+    "electron-squirrel-startup": "^1.0.0",
     "kas-meri": "^0.2.2",
     "katex": "^0.13.2",
     "nerdamer": "^1.1.10"
   },
   "devDependencies": {
-    "electron-rebuild": "^2.3.5"
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-wix": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
+    "electron": "^12.0.5",
+    "electron-rebuild": "^2.3.5",
+    "electron-wix-msi": "^3.2.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "icon.ico"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-wix",
+          "config": {
+            "language": 1035,
+            "manufacturer": "Hakaponttoauto",
+            "shortcutFolderName": "Matho",
+            "appIconPath": "icon.ico"
+          }
+        }
+      ]
+    }
   }
 }

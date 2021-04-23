@@ -1,0 +1,76 @@
+body {
+    height: 90vh;
+    width: 90vw;
+    box-sizing: border-box;
+    background-color: rgb(255, 255, 255);
+    overflow: hidden;
+}
+
+
+.latex-row {
+    color: rgb(0, 0, 0);
+    padding-left: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2em;
+    margin-top: -1em;
+    height: min-content;
+    display: flex;
+    flex-wrap: wrap-reverse;
+}
+
+.katex-display .katex {
+    text-align: left !important;
+}
+
+div[response] {
+    margin-top: -2em;
+    padding-left: 32px;
+}
+
+div[response] .mathcont::before {
+    content: "=";
+    position: relative;
+    right: 23px;
+    top: 38px;
+
+    right: 23px;
+    top: 50%;
+}
+
+
+#console-container {
+    height: fit-content;
+    margin-top: 130%;
+    width:100%;
+}
+
+#container {
+    width:109%;
+    height:109%;
+    overflow-y: scroll;
+}
+
+.note {
+    background-color: #ffffff00;
+    border: none;
+    min-width: 3em;
+    color:rgba(0, 0, 0);
+    margin: 0px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.note:focus {
+    background-color: #ffffff50;
+    color:rgb(255, 255, 255);
+}
+
+
+:focus {
+    outline: none;
+}

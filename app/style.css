@@ -6,11 +6,6 @@ body {
     overflow: hidden;
 }
 
-#math-input {
-    position: absolute;
-    bottom: 2px;
-    height: 1.5em;
-}
 
 .latex-row {
     color: white;
@@ -20,7 +15,8 @@ body {
     min-height: 2em;
     height: fit-content;
     border-top: 1px solid rgb(0, 0, 0);
-    margin-top: -16px;
+    display: flex;
+    flex-wrap: wrap-reverse;
 }
 
 .katex-display .katex {
@@ -44,7 +40,7 @@ div[response] {
 }
 
 #container {
-    width:105%;
+    width:109%;
     height:100%;
     overflow-y: scroll;
 }
@@ -53,19 +49,50 @@ input {
     margin: auto;
     width: 90%;
     box-sizing: border-box;
-    border: 1px solid rgb(0, 0, 0);
-    border-radius: 0;
-    background-color: #f8f8f8;
     font-size: 16px;
     resize: none;
-    font-family: 'Courier New', Courier, monospace;
 }
 
-input:focus {
-    box-sizing: border-box;
+#math-input {
+    position: absolute;
+    bottom: 2px;
+    height: 1.5em;
+    font-family: 'Courier New', Courier, monospace;
     border: 1px solid rgb(0, 0, 0);
     border-radius: 0;
     background-color: #f8f8f8;
+    margin-bottom: 8px;
+}
+
+#math-input:focus {
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0;
+    background-color: #f8f8f8;
+}
+
+.note {
+    background-color: #ffffff00;
+    border: none;
+    min-width: 3em;
+    color:rgba(255, 255, 255, 0.5);
+    margin: 0px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.latex-row:hover > .note{
+    background-color: #ffffff50;
+}
+
+.note:focus {
+    background-color: #ffffff50;
+    color:rgb(255, 255, 255);
+}
+
+
+:focus {
     outline: none;
 }
 
