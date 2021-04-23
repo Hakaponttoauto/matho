@@ -1,0 +1,74 @@
+body {
+    height: 90vh;
+    width: 90vw;
+    box-sizing: border-box;
+    background-color: rgb(36, 11, 32);
+    overflow: hidden;
+}
+
+#math-input {
+    position: absolute;
+    bottom: 2px;
+    height: 1.5em;
+}
+
+.latex-row {
+    color: white;
+    padding-left: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2em;
+    height: fit-content;
+    border-top: 1px solid rgb(0, 0, 0);
+    margin-top: -16px;
+}
+
+.katex-display .katex {
+    text-align: left !important;
+}
+
+.latex-row:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+div[response] {
+    padding-left: 32px;
+    border-top: 2px solid white;
+}
+
+
+#console-container {
+    height: fit-content;
+    margin-top: 130%;
+    width:100%;
+}
+
+#container {
+    width:105%;
+    height:100%;
+    overflow-y: scroll;
+}
+
+input {
+    margin: auto;
+    width: 90%;
+    box-sizing: border-box;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0;
+    background-color: #f8f8f8;
+    font-size: 16px;
+    resize: none;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+input:focus {
+    box-sizing: border-box;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0;
+    background-color: #f8f8f8;
+    outline: none;
+}
+
+#refresh {
+    background-color: rgba(0, 0, 0, 0.7);
+}
