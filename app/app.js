@@ -22,6 +22,20 @@ function insertAfter(newNode, existingNode) {
     existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
 }
 
+function formatAnswer(ans) {
+    let count = 0;
+    let res="";
+    for (x in ans) {
+        if (count==0) {
+            res+=`${x}=${ans[x]}`
+        } else {
+            res+=`, ${x}=${ans[x]}`
+        }
+        count++;
+    }
+    return res;
+}
+
 function createElement(str) {
     var div = document.createElement('div');
     div.innerHTML = str;
@@ -119,9 +133,18 @@ document.getElementById("math-input").addEventListener("keyup", function(event) 
     if (event.key === "Enter") {
         if (event.shiftKey) {
             event.preventDefault();
-            let expr=KAS.parse(document.getElementById("math-input").value).expr;
-            respond(document.getElementById("refresh"),nerdamer(expr.print()).toTeX());
-        } else {
+            let expr=KAS.parse(document.getElementById("math-input").value).expr.print();
+            let children = document.getElementById("console-container").childNodes;
+            let args = {};
+            for (let i = 0; i < children.length; i++) {
+                let child = children[i];
+                let content = child.getAttribute("math-content");
+                if (expr.includes(content.charAt(0)) && /^[A-Za-z]=.*$/.test(content)) {
+                    args[content.charAt(0)]=content.slice(2);
+                }
+            }
+            respond(document.getElementById("refresh"),nerdamer(expr,args).toTeX(),formatAnswer(args));        
+    } else {
             event.preventDefault();
             newLine();
         }
@@ -177,6 +200,22 @@ window.addEventListener('contextmenu', (e) => {
         click: function(){
             let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr;
             respond(e.target.closest('div[class="latex-row"]'),nerdamer(expr.print()).evaluate().toTeX('decimal'),"≈");        }
+        }));
+        menu.append(new MenuItem({
+            label: "Laske muuttujien perusteella",
+            click: function(){
+                let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr.print();
+                let children = document.getElementById("console-container").childNodes;
+                let args = {};
+                for (let i = 0; i < children.length; i++) {
+                    let child = children[i];
+                    let content = child.getAttribute("math-content");
+                    if (expr.includes(content.charAt(0)) && /^[A-Za-z]=.*$/.test(content)) {
+                        args[content.charAt(0)]=content.slice(2);
+                    }
+                }
+                respond(e.target.closest('div[class="latex-row"]'),nerdamer(expr,args).toTeX(),formatAnswer(args));        
+            }
         }));
         menu.append(new MenuItem({
         label: "Sievennä",

@@ -38,7 +38,7 @@ function createDisplay () {
  
    // and load the index.html of the app.
    displayWindow.loadFile('app/display.html');
-   //displayWindow.removeMenu();
+   displayWindow.removeMenu();
    displayWindow.setIcon(path.join(__dirname, '/icon.png'));
 }
 
