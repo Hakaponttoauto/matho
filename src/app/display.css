@@ -63,6 +63,8 @@ div[response] .mathcont::before {
     margin-bottom: auto;
     margin-left: auto;
     margin-right: 10px;
+    position:relative;
+    top: 1em;
 }
 
 .note:focus {

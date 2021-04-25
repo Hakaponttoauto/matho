@@ -133,7 +133,7 @@ document.getElementById("math-input").addEventListener("keyup", function(event) 
     if (event.key === "Enter") {
         if (event.shiftKey) {
             event.preventDefault();
-            let expr=KAS.parse(document.getElementById("math-input").value).expr.print();
+            let expr=nerdamer.convertFromLaTeX(document.getElementById("math-input").value).toString();
             let children = document.getElementById("console-container").childNodes;
             let args = {};
             for (let i = 0; i < children.length; i++) {
@@ -255,6 +255,7 @@ electron.ipcRenderer.on('command', function(event, message) {
         case "clear":
             removeChilds(document.getElementById("console-container"));
             newLine();
+            nerdamer.flush();
             break;
         case "save":
             save();

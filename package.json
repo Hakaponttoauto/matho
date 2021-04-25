@@ -1,14 +1,14 @@
 {
   "name": "matho",
+  "productName": "Matho",
   "version": "1.0.0",
   "description": "Math tool",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron-forge start",
-    "build": "electron-packager . --overwrite",
-    "make": "electron-forge make",
-    "package": "electron-forge package"
+    "start": "electron .",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "author": "Hakaponttoauto",
   "license": "ISC",
@@ -20,11 +20,7 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-deb": "^6.0.0-beta.54",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-wix": "^6.0.0-beta.54",
-    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "electron": "^12.0.5",
     "electron-rebuild": "^2.3.5",
     "electron-wix-msi": "^3.2.0"
