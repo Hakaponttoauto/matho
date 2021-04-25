@@ -4,6 +4,7 @@ body {
     box-sizing: border-box;
     background-color: rgb(255, 255, 255);
     overflow: hidden;
+    font-size: 20px;
 }
 
 
@@ -33,9 +34,6 @@ div[response] {
 div[response] .mathcont::before {
     content: "=";
     position: relative;
-    right: 23px;
-    top: 38px;
-
     right: 23px;
     top: 50%;
 }

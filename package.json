@@ -1,7 +1,7 @@
 {
   "name": "matho",
   "productName": "Matho",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Math tool",
   "main": "src/main.js",
   "scripts": {
@@ -28,7 +28,8 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "icon.ico"
+        "icon": "icon.ico",
+        "executableName": "matho-${version}"
       },
       "makers": [
         {
@@ -37,7 +38,9 @@
             "language": 1035,
             "manufacturer": "Hakaponttoauto",
             "shortcutFolderName": "Matho",
-            "appIconPath": "icon.ico"
+            "appIconPath": "icon.ico",
+            "exe": "matho-${version}",
+            "version": "${version}"
           }
         }
       ]

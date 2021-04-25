@@ -1,5 +1,5 @@
 const katex = require("katex");
-const nerdamer = require("nerdamer");
+const nerdamer = require("nerdamer/all");
 const KAS = require("kas-meri");
 const { remote, clipboard, app } = require('electron');
 const { Menu, MenuItem } = remote;
@@ -64,21 +64,27 @@ function createMathField(content,comment) {
 
 function updateLatex() {
     if (document.getElementById("refresh")==undefined) {
-        newLine();
+        newLine(true);
     }
-    let html = katex.renderToString(document.getElementById("math-input").value, {
+    let content="";
+    if (!document.getElementById("math-input").hasAttribute("raw")) {
+        content=document.getElementById("math-input").value;
+    } else {
+        content=nerdamer.convertToLaTeX(document.getElementById("math-input").value).toString();
+    }
+    let html = katex.renderToString(content, {
         throwOnError: false,
         displayMode: true
     });
     document.getElementById("refresh").firstChild.innerHTML=html;
-    document.getElementById("refresh").setAttribute("math-content",document.getElementById("math-input").value)
+    document.getElementById("refresh").setAttribute("math-content",content)
     let topPosition = document.getElementById("refresh").offsetTop;
     if (topPosition>document.getElementById("container").scrollTop) {
         document.getElementById("container").scrollTop = topPosition+100;
     }
 }
 
-function newLine() {
+function newLine(update) {
     if (document.getElementById("console-container").lastChild != null && "getAttribute" in document.getElementById("console-container").lastChild && document.getElementById("console-container").lastChild.getAttribute("math-input")=="") {
         setFocus(document.getElementById("console-container").lastChild);
     } else {
@@ -91,7 +97,9 @@ function newLine() {
         }
         node=createMathField("");
         node.setAttribute("id", "refresh")
-        document.getElementById("math-input").value="";
+        if (update===undefined) {
+            document.getElementById("math-input").value="";
+        }
     }
     document.getElementById("container").scrollTop = document.getElementById("refresh").offsetTop + 1000;
 }
@@ -161,7 +169,7 @@ document.getElementById("math-input").addEventListener("keyup", function(event) 
 
 
 window.addEventListener('contextmenu', (e) => {
-    target = e.target.closest('div[class="latex-row"]');
+    let target = e.target.closest('div[class="latex-row"]');
     if (target) {
         globalStore.eventTarget=target;
         e.preventDefault();
@@ -188,7 +196,13 @@ window.addEventListener('contextmenu', (e) => {
             }
             }));
         }
-
+        menu.append(new MenuItem({
+            label: "Poista",
+            click: function(){
+                document.getElementById("console-container").removeChild(e.target.closest('div[class="latex-row"]'));
+            }
+        }));
+        menu.append(new MenuItem({type: "separator"}));
         menu.append(new MenuItem({
         label: "Laske murtolukuna",
         click: function(){
@@ -217,6 +231,7 @@ window.addEventListener('contextmenu', (e) => {
                 respond(e.target.closest('div[class="latex-row"]'),nerdamer(expr,args).toTeX(),formatAnswer(args));        
             }
         }));
+        menu.append(new MenuItem({type: "separator"}));
         menu.append(new MenuItem({
         label: "Sievennä",
         click: function(){
@@ -226,8 +241,8 @@ window.addEventListener('contextmenu', (e) => {
         menu.append(new MenuItem({
         label: "Jaa tekijöihin",
         click: function(){
-            let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr;
-            respond(e.target.closest('div[class="latex-row"]'),nerdamer.convertToLaTeX(expr.expand().factor().print()),"JaaTekijöihin()");        }
+            let expr=nerdamer.convertFromLaTeX(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).toString();
+            respond(e.target.closest('div[class="latex-row"]'),nerdamer.convertToLaTeX(nerdamer.factor(expr).text()),"JaaTekijöihin()");        }
         }));
         menu.popup({ window: remote.getCurrentWindow() })
     }
@@ -262,6 +277,20 @@ electron.ipcRenderer.on('command', function(event, message) {
             break;
         case "load":
             load()
+            break;
+        case "raw":
+            document.getElementById("math-input").setAttribute("raw","");
+            document.getElementById("math-input").setAttribute("placeholder","Kirjoita matematiikkaa...");
+            break;
+        case "latex":
+            document.getElementById("math-input").removeAttribute("raw");
+            document.getElementById("math-input").setAttribute("placeholder","Kirjoita Latexia...");
+            break;
+        case "light":
+            document.getElementById('css').href = 'light.css';
+            break;
+        case "dark":
+            document.getElementById('css').href = 'style.css';
             break;
     }
 });

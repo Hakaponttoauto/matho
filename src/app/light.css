@@ -1,0 +1,104 @@
+body {
+    height: 90vh;
+    width: 90vw;
+    box-sizing: border-box;
+    background-color: rgb(201, 201, 201);
+    overflow: hidden;
+}
+
+
+.latex-row {
+    color: rgb(0, 0, 0);
+    padding-left: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2em;
+    height: fit-content;
+    border-top: 1px solid rgb(255, 255, 255);
+    display: flex;
+    flex-wrap: wrap-reverse;
+    background-color: #e0e0e0;
+}
+
+.katex-display .katex {
+    text-align: left !important;
+}
+
+.latex-row:hover {
+    background-color: rgb(186, 144, 253);
+}
+
+div[response] {
+    padding-left: 32px;
+    border-top: 2px solid rgb(201, 201, 201);
+    border-bottom: 8px solid rgb(201, 201, 201);
+    background-color: #d9c4ff;
+}
+
+#console-container {
+    height: fit-content;
+    margin-top: 130%;
+    width:100%;
+}
+
+#container {
+    width:109%;
+    height:100%;
+    overflow-y: scroll;
+}
+
+input {
+    margin: auto;
+    width: 90%;
+    box-sizing: border-box;
+    font-size: 16px;
+    resize: none;
+}
+
+#math-input {
+    position: absolute;
+    bottom: 2px;
+    height: 1.5em;
+    font-family: 'Courier New', Courier, monospace;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0;
+    background-color: #f8f8f8;
+    margin-bottom: 8px;
+}
+
+#math-input:focus {
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0;
+    background-color: #f8f8f8;
+}
+
+.note {
+    background-color: #ffffff00;
+    border: none;
+    min-width: 3em;
+    color:rgba(0, 0, 0, 0.7);
+    margin: 0px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.latex-row:hover > .note{
+    background-color: #ffffff;
+}
+
+.note:focus {
+    background-color: #ffffff;
+    color:rgb(0, 0, 0);
+    border: 1px solid black;
+}
+
+
+:focus {
+    outline: none;
+}
+
+#refresh {
+    background-color: rgb(255, 255, 255);
+}
