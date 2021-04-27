@@ -1,15 +1,72 @@
-const katex = require("katex");
-const nerdamer = require("nerdamer/all");
-const KAS = require("kas-meri");
 const { remote, clipboard, app } = require('electron');
 const { Menu, MenuItem } = remote;
 const fs = require('fs');
 const path = require('path');
 
+const AlgebraLatex = require('algebra-latex')
+const nerdamer = require("nerdamer/all");
+
 const userDataPath = (app || remote.app).getPath('userData');
 
-let globalStore = {
-    eventTarget: null
+let config = {
+    handlers: {
+    edit: function(mathField) {
+        updateLatex();
+    },
+    }
+}
+
+function save() {
+    fs.writeFileSync(path.join(userDataPath,'session.html'), document.getElementById("console-container").innerHTML, (err) => {
+        // throws an error, you could also catch it here
+        if (err) throw err;
+    });
+}
+
+function load() {
+    let data = fs.readFileSync(path.join(userDataPath,'session.html'), 'utf8');
+    node = createElement(data);
+    removeChilds(document.getElementById("console-container"));
+    document.getElementById("console-container").appendChild(node);
+    document.getElementById("container").scrollTop = document.getElementById("console-container").lastChild.offsetTop + 1000;
+}
+
+let MQ = MathQuill.getInterface(2);
+
+let input = MQ.MathField(document.getElementById("math-input"),config);
+
+input.focus();
+
+load();
+
+try {
+    input.latex(document.getElementById("refresh").getAttribute("math-content"))
+} catch {
+    //AGAIN
+}
+
+function latexMath(input) {
+    return new AlgebraLatex().parseLatex(input).toMath()
+}
+function mathLatex(input) {
+    return new AlgebraLatex().parseMath(input).toLatex()
+}
+
+function calc(input,alg) {
+    switch(alg) {
+        case "run":
+            return mathLatex(nerdamer(latexMath(input)).toString())
+        case "eval":
+            try {
+                return mathLatex(nerdamer(latexMath(input)).evaluate().text())
+            } catch {
+                return nerdamer(latexMath(input)).evaluate().text()
+            }
+        case "factor":
+            return mathLatex(nerdamer.factor(latexMath(input)).toString())
+        case "simplify":
+            return mathLatex(nerdamer.simplify(latexMath(input)).toString())
+    }
 }
 
 function removeChilds(parent) {
@@ -53,12 +110,16 @@ function createMathField(content,comment) {
     node.setAttribute("class","latex-row");
     node.setAttribute("math-content",content);
     node.setAttribute("onclick", "setFocus(this)");
-    let html = katex.renderToString(content, {
-        throwOnError: false,
-        displayMode: true
-    });
-    node.appendChild(createElement('<div class="mathcont">'+html+'</div><span role="textbox" spellcheck="false" class="note" contenteditable onclick="event.stopPropagation();">'+comment+'</span>'));
+
+    let mqel = document.createElement("SPAN");
+    mqel.setAttribute("class","mathcont")
+
+    node.appendChild(mqel);
+    node.appendChild(createElement('<span role="textbox" spellcheck="false" class="note" contenteditable onclick="event.stopPropagation();">'+comment+'</span>'));
     document.getElementById("console-container").appendChild(node);
+    let mq = MQ.StaticMath(mqel);
+    mq.latex(content);
+
     return node;
 }
 
@@ -67,17 +128,20 @@ function updateLatex() {
         newLine(true);
     }
     let content="";
-    if (!document.getElementById("math-input").hasAttribute("raw")) {
-        content=document.getElementById("math-input").value;
-    } else {
-        content=nerdamer.convertToLaTeX(document.getElementById("math-input").value).toString();
+    content=input.latex();
+    
+    try {
+        let mq = MQ.StaticMath(document.getElementById("refresh").firstChild);
+        mq.latex(content);
+    } catch {
+        let mqel = document.createElement("SPAN");
+        mqel.setAttribute("class","mathcont");
+        document.getElementById("refresh").firstChild.replaceWith(mqel);
+        let mq = MQ.StaticMath(mqel);
+        mq.latex(content)
     }
-    let html = katex.renderToString(content, {
-        throwOnError: false,
-        displayMode: true
-    });
-    document.getElementById("refresh").firstChild.innerHTML=html;
-    document.getElementById("refresh").setAttribute("math-content",content)
+    
+    document.getElementById("refresh").setAttribute("math-content",content);
     let topPosition = document.getElementById("refresh").offsetTop;
     if (topPosition>document.getElementById("container").scrollTop) {
         document.getElementById("container").scrollTop = topPosition+100;
@@ -98,7 +162,7 @@ function newLine(update) {
         node=createMathField("");
         node.setAttribute("id", "refresh")
         if (update===undefined) {
-            document.getElementById("math-input").value="";
+            input.latex("");
         }
     }
     document.getElementById("container").scrollTop = document.getElementById("refresh").offsetTop + 1000;
@@ -129,8 +193,8 @@ function setFocus(element) {
     }
     element.setAttribute("id", "refresh");
 
-    document.getElementById("math-input").value = element.getAttribute("math-content");
-    document.getElementById("math-input").focus();
+    input.latex(element.getAttribute("math-content"));
+    input.focus();
     let topPosition = document.getElementById("refresh").offsetTop;
     if (topPosition>document.getElementById("container").scrollTop) {
         document.getElementById("container").scrollTop = topPosition+100;
@@ -141,37 +205,35 @@ document.getElementById("math-input").addEventListener("keyup", function(event) 
     if (event.key === "Enter") {
         if (event.shiftKey) {
             event.preventDefault();
-            let expr=nerdamer.convertFromLaTeX(document.getElementById("math-input").value).toString();
-            let children = document.getElementById("console-container").childNodes;
-            let args = {};
-            for (let i = 0; i < children.length; i++) {
-                let child = children[i];
-                let content = child.getAttribute("math-content");
-                if (expr.includes(content.charAt(0)) && /^[A-Za-z]=.*$/.test(content)) {
-                    args[content.charAt(0)]=content.slice(2);
-                }
-            }
-            respond(document.getElementById("refresh"),nerdamer(expr,args).toTeX(),formatAnswer(args));        
-    } else {
+            respond(document.getElementById("refresh"), calc(input.latex(),"run"));
+            input.latex("");
+        } else {
             event.preventDefault();
             newLine();
+            calc(input.latex(),"run");
         }
     }
-    if (event.key === "ArrowUp") {
-        let target = document.getElementById("refresh").previousElementSibling;
-        document.getElementById("math-input").value+=target.getAttribute("math-content");
-        updateLatex();
+    if (event.ctrlKey) {
+        if (event.key === "ArrowUp") {
+            let target = (document.getElementById("refresh") && document.getElementById("refresh").previousElementSibling) || document.getElementById("console-container").lastElementChild;
+            setFocus(target);
+        }
+        if (event.key === "ArrowDown") {
+            let target = document.getElementById("refresh").nextElementSibling
+            setFocus(target);
+        }
+        if (event.key === "Delete") {
+            input.latex("");
+            document.getElementById("console-container").removeChild(document.getElementById("refresh"));
+        }
     }
-    if (event.key === "Backspace" && document.getElementById("math-input").value === "") {
-        document.getElementById("console-container").removeChild(document.getElementById("refresh"));
-    }
+    
   }); 
 
 
 window.addEventListener('contextmenu', (e) => {
     let target = e.target.closest('div[class="latex-row"]');
     if (target) {
-        globalStore.eventTarget=target;
         e.preventDefault();
         const menu = new Menu();
         menu.append(new MenuItem({
@@ -185,14 +247,14 @@ window.addEventListener('contextmenu', (e) => {
             menu.append(new MenuItem({
             label: "Muotoile vastauksena",
             click: function(){
-                globalStore.eventTarget.setAttribute("response","")
+                e.target.closest('div[class="latex-row"]').setAttribute("response","")
             }
             }));
         } else {
             menu.append(new MenuItem({
             label: "Poista muotoilu",
             click: function(){
-                globalStore.eventTarget.removeAttribute("response")
+                e.target.closest('div[class="latex-row"]').removeAttribute("response")
             }
             }));
         }
@@ -206,62 +268,36 @@ window.addEventListener('contextmenu', (e) => {
         menu.append(new MenuItem({
         label: "Laske murtolukuna",
         click: function(){
-            let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr;
-            respond(e.target.closest('div[class="latex-row"]'),nerdamer(expr.print()).toTeX(),"=");        }
-        }));
+            let target = e.target.closest('div[class="latex-row"]');
+            let expr=target.getAttribute("math-content");
+            respond(target, calc(expr,"run"));
+        }}));
         menu.append(new MenuItem({
         label: "Laske desimaalilukuna",
         click: function(){
-            let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr;
-            respond(e.target.closest('div[class="latex-row"]'),nerdamer(expr.print()).evaluate().toTeX('decimal'),"≈");        }
-        }));
-        menu.append(new MenuItem({
-            label: "Laske muuttujien perusteella",
-            click: function(){
-                let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr.print();
-                let children = document.getElementById("console-container").childNodes;
-                let args = {};
-                for (let i = 0; i < children.length; i++) {
-                    let child = children[i];
-                    let content = child.getAttribute("math-content");
-                    if (expr.includes(content.charAt(0)) && /^[A-Za-z]=.*$/.test(content)) {
-                        args[content.charAt(0)]=content.slice(2);
-                    }
-                }
-                respond(e.target.closest('div[class="latex-row"]'),nerdamer(expr,args).toTeX(),formatAnswer(args));        
-            }
-        }));
+            let target = e.target.closest('div[class="latex-row"]');
+            let expr=target.getAttribute("math-content");
+            respond(target, calc(expr,"eval"),"≈");
+        }}));
+
         menu.append(new MenuItem({type: "separator"}));
         menu.append(new MenuItem({
         label: "Sievennä",
         click: function(){
-            let expr=KAS.parse(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).expr;
-            respond(e.target.closest('div[class="latex-row"]'),nerdamer.convertToLaTeX(expr.collect().print()),"Sievennä()");        }
-        }));
+            let target = e.target.closest('div[class="latex-row"]');
+            let expr=target.getAttribute("math-content");
+            respond(target, calc(expr,"simplify").toString(),"Sievennä()");
+        }}));
         menu.append(new MenuItem({
         label: "Jaa tekijöihin",
         click: function(){
-            let expr=nerdamer.convertFromLaTeX(e.target.closest('div[class="latex-row"]').getAttribute("math-content")).toString();
-            respond(e.target.closest('div[class="latex-row"]'),nerdamer.convertToLaTeX(nerdamer.factor(expr).text()),"JaaTekijöihin()");        }
-        }));
+            let target = e.target.closest('div[class="latex-row"]');
+            let expr=target.getAttribute("math-content");
+            respond(target, calc(expr,"factor").toString(),"JaaTekijöihin()");
+        }}));
         menu.popup({ window: remote.getCurrentWindow() })
     }
 }, false)
-
-function save() {
-    fs.writeFileSync(path.join(userDataPath,'session.html'), document.getElementById("console-container").innerHTML, (err) => {
-        // throws an error, you could also catch it here
-        if (err) throw err;
-    });
-}
-
-function load() {
-    let data = fs.readFileSync(path.join(userDataPath,'session.html'), 'utf8');
-    node = createElement(data);
-    removeChilds(document.getElementById("console-container"));
-    document.getElementById("console-container").appendChild(node);
-    document.getElementById("container").scrollTop = document.getElementById("console-container").lastChild.offsetTop + 1000;
-}
 
 let electron=require('electron');
 
@@ -278,24 +314,14 @@ electron.ipcRenderer.on('command', function(event, message) {
         case "load":
             load()
             break;
-        case "raw":
-            document.getElementById("math-input").setAttribute("raw","");
-            document.getElementById("math-input").setAttribute("placeholder","Kirjoita matematiikkaa...");
-            break;
-        case "latex":
-            document.getElementById("math-input").removeAttribute("raw");
-            document.getElementById("math-input").setAttribute("placeholder","Kirjoita Latexia...");
-            break;
         case "light":
             document.getElementById('css').href = 'light.css';
             break;
         case "dark":
-            document.getElementById('css').href = 'style.css';
+            document.getElementById('css').href = '';
             break;
     }
 });
-
-load();
 
 window.onbeforeunload = () => {
     save();

@@ -1,68 +1,53 @@
 body {
-    height: 90vh;
-    width: 90vw;
-    box-sizing: border-box;
-    background-color: rgb(255, 255, 255);
-    overflow: hidden;
     font-size: 20px;
+    background-color: rgb(255, 255, 255);
 }
 
+#container {
+    height: 100%;
+}
 
 .latex-row {
     color: rgb(0, 0, 0);
     padding-left: 5px;
     padding-top: 0px;
     padding-bottom: 0px;
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 2em;
-    margin-top: -1em;
-    height: min-content;
-    display: flex;
-    flex-wrap: wrap-reverse;
-}
-
-.katex-display .katex {
-    text-align: left !important;
+    min-height: 1em;
+    border-top: 0px solid rgb(0, 0, 0);
 }
 
 div[response] {
-    margin-top: -2em;
     padding-left: 32px;
+    border-top: 1px solid rgb(0, 0, 0);
+    margin-bottom: 16px;
 }
 
+/*
 div[response] .mathcont::before {
     content: "=";
     position: relative;
     right: 23px;
-    top: 50%;
+    top: 100%;
 }
-
-
-#console-container {
-    height: fit-content;
-    margin-top: 130%;
-    width:100%;
-}
-
-#container {
-    width:109%;
-    height:109%;
-    overflow-y: scroll;
-}
+*/
 
 .note {
     background-color: #ffffff00;
     border: none;
-    min-width: 3em;
     color:rgba(0, 0, 0);
     margin: 0px;
     margin-top: auto;
     margin-bottom: auto;
     margin-left: auto;
     margin-right: 10px;
-    position:relative;
-    top: 1em;
+}
+
+.latex-row:hover {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.latex-row:hover > .note{
+    background-color: #ffffff00;
 }
 
 .note:focus {
@@ -70,7 +55,6 @@ div[response] .mathcont::before {
     color:rgb(255, 255, 255);
 }
 
-
-:focus {
-    outline: none;
+#refresh {
+    background-color: rgba(0, 0, 0, 0);
 }

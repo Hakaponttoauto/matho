@@ -4,19 +4,25 @@
 <head>
 <title>Matho</title>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css" id="css">
-<link rel="stylesheet" href="katex.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="" id="css">
+<link rel="stylesheet" href="../../node_modules/@digabi/mathquill/build/mathquill.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="../../node_modules/@digabi/mathquill/build/mathquill.min.js"></script>
 </head>
 
 <body>
-
-<div id="container">
-    <div id="console-container">
-        <div class="latex-row" id="refresh" onclick="setFocus(this);"><div class="mathcont"></div><span role="textbox" spellcheck="false" class="note" contenteditable onclick="event.stopPropagation()"></span></div>
+<div id="main-flex">
+    <div id="container">
+        <div id="spacer"></div>
+        <div id="console-container">
+            <div class="latex-row" id="refresh" onclick="setFocus(this);"><div class="mathcont"></div><span role="textbox" spellcheck="false" class="note" contenteditable onclick="event.stopPropagation()"></span></div>
+        </div>
+    </div>
+    <div id="input-container">
+        <div id="math-input" autofocus></div>
     </div>
 </div>
-<input type="text" id="math-input" oninput="updateLatex()" placeholder="Kirjoita Latexia..." autofocus>
 
 <script src="app.js"></script>
 

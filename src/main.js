@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Menu, MenuItem, nativeTheme} = require('electron')
+const { app, BrowserWindow, Menu, nativeTheme} = require('electron')
 const path = require('path');
 const fs = require('fs');
 const userDataPath = app.getPath('userData');
@@ -56,11 +56,6 @@ function createWindow() {
    mainWindow.once('ready-to-show', () => {
       mainWindow.show();
       mainWindow.setAlwaysOnTop(get("alwaysontop"));
-      if (get("rawmode")) {
-         mainWindow.webContents.send('command', 'raw');
-      } else {
-         mainWindow.webContents.send('command', 'latex');
-      }
       if (get("lightmode")) {
          mainWindow.webContents.send('command', 'light');
          nativeTheme.themeSource = "light";
@@ -114,20 +109,7 @@ const template = [
             click: (item, mainWindow) => {
                mainWindow.webContents.send('command', 'save');
             }
-         },
-         {
-            label: 'Raakatila (WIP)',
-            type: 'checkbox',
-            checked: get("rawmode"),
-            click: (item, mainWindow) => {
-               if (item.checked) {
-                  mainWindow.webContents.send('command', 'raw');
-               } else {
-                  mainWindow.webContents.send('command', 'latex');
-               }
-               set("rawmode",item.checked);
-            }
-         },
+         }
       ]
    },
    {
@@ -171,9 +153,6 @@ const template = [
          },
          {
             role: 'zoomout'
-         },
-         {
-            role: 'reload'
          },
          {
             role: 'toggledevtools'
