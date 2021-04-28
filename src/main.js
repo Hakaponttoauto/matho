@@ -94,18 +94,21 @@ const template = [
       submenu: [
          {
             label: 'Tyhjennä',
+            accelerator: "CmdOrCtrl+N",
             click: (item, mainWindow) => {
                mainWindow.webContents.send('command', 'clear');
             }
          },
          {
             label: 'Avaa',
+            accelerator: "CmdOrCtrl+O",
             click: (item, mainWindow) => {
                mainWindow.webContents.send('command', 'load');
             }
          },
          {
             label: 'Tallenna',
+            accelerator: "CmdOrCtrl+S",
             click: (item, mainWindow) => {
                mainWindow.webContents.send('command', 'save');
             }
@@ -140,6 +143,7 @@ const template = [
       submenu: [
          {
             label: "Esikatsele tallennusta",
+            accelerator: "CmdOrCtrl+P",
             click: (item, mainWindow) => {
                mainWindow.webContents.send('command', 'save');
                createDisplay();

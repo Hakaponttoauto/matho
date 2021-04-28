@@ -5,6 +5,7 @@ const path = require('path');
 
 const AlgebraLatex = require('algebra-latex')
 const nerdamer = require("nerdamer/all");
+const mexp = require('math-expression-evaluator');
 
 const userDataPath = (app || remote.app).getPath('userData');
 
@@ -16,28 +17,6 @@ let config = {
     }
 }
 
-function save() {
-    fs.writeFileSync(path.join(userDataPath,'session.html'), document.getElementById("console-container").innerHTML, (err) => {
-        // throws an error, you could also catch it here
-        if (err) throw err;
-    });
-}
-
-function load() {
-    let data = fs.readFileSync(path.join(userDataPath,'session.html'), 'utf8');
-    node = createElement(data);
-    removeChilds(document.getElementById("console-container"));
-    document.getElementById("console-container").appendChild(node);
-    document.getElementById("container").scrollTop = document.getElementById("console-container").lastChild.offsetTop + 1000;
-}
-
-let MQ = MathQuill.getInterface(2);
-
-let input = MQ.MathField(document.getElementById("math-input"),config);
-
-input.focus();
-
-load();
 
 try {
     input.latex(document.getElementById("refresh").getAttribute("math-content"))
@@ -55,17 +34,21 @@ function mathLatex(input) {
 function calc(input,alg) {
     switch(alg) {
         case "run":
-            return mathLatex(nerdamer(latexMath(input)).toString())
+            return mathLatex(nerdamer.expand(latexMath(input)).evaluate().toString())
         case "eval":
             try {
-                return mathLatex(nerdamer(latexMath(input)).evaluate().text())
+                return mexp.eval(nerdamer.expand(latexMath(input)).toString())
             } catch {
-                return nerdamer(latexMath(input)).evaluate().text()
+                return mathLatex(nerdamer.expand(latexMath(input)).evaluate().toString())
             }
         case "factor":
             return mathLatex(nerdamer.factor(latexMath(input)).toString())
         case "simplify":
-            return mathLatex(nerdamer.simplify(latexMath(input)).toString())
+            try {
+                return mathLatex(nerdamer.simplify(latexMath(input)).toString())
+            } catch {
+                return mathLatex(nerdamer.simplify(input).toString())
+            }
     }
 }
 
@@ -104,7 +87,34 @@ function createElement(str) {
     return container;
 }
 
-function createMathField(content,comment) {
+function save() {
+    fs.writeFileSync(path.join(userDataPath,'session.html'), document.getElementById("console-container").innerHTML, (err) => {
+        // throws an error, you could also catch it here
+        if (err) throw err;
+    });
+}
+
+function load() {
+    try {
+        let data = fs.readFileSync(path.join(userDataPath,'session.html'), 'utf8');
+        node = createElement(data);
+        removeChilds(document.getElementById("console-container"));
+        document.getElementById("console-container").appendChild(node);
+        //document.getElementById("container").scrollTop = document.getElementById("console-container").lastChild.offsetTop + 1000;
+
+    } catch {
+        //Errors on startup, but who cares if the execution continues
+    }
+}
+load();
+
+let MQ = MathQuill.getInterface(2);
+
+let input = MQ.MathField(document.getElementById("math-input"),config);
+
+input.focus();
+
+function createMathField(content,comment,target) {
     if (comment===undefined) {comment=""}
     let node = document.createElement("DIV");
     node.setAttribute("class","latex-row");
@@ -116,7 +126,11 @@ function createMathField(content,comment) {
 
     node.appendChild(mqel);
     node.appendChild(createElement('<span role="textbox" spellcheck="false" class="note" contenteditable onclick="event.stopPropagation();">'+comment+'</span>'));
-    document.getElementById("console-container").appendChild(node);
+    try {
+        insertAfter(node, target);
+    } catch {
+        document.getElementById("console-container").appendChild(node);
+    }
     let mq = MQ.StaticMath(mqel);
     mq.latex(content);
 
@@ -142,14 +156,11 @@ function updateLatex() {
     }
     
     document.getElementById("refresh").setAttribute("math-content",content);
-    let topPosition = document.getElementById("refresh").offsetTop;
-    if (topPosition>document.getElementById("container").scrollTop) {
-        document.getElementById("container").scrollTop = topPosition+100;
-    }
+    scrollAt(document.getElementById("refresh"))
 }
 
 function newLine(update) {
-    if (document.getElementById("console-container").lastChild != null && "getAttribute" in document.getElementById("console-container").lastChild && document.getElementById("console-container").lastChild.getAttribute("math-input")=="") {
+    if (document.getElementById("console-container").lastChild != null && "getAttribute" in document.getElementById("console-container").lastChild && document.getElementById("console-container").lastChild.getAttribute("math-content")=="") {
         setFocus(document.getElementById("console-container").lastChild);
     } else {
         if (document.getElementById("refresh") != undefined) {
@@ -160,31 +171,25 @@ function newLine(update) {
             }
         }
         node=createMathField("");
-        node.setAttribute("id", "refresh")
+        node.setAttribute("id", "refresh");
         if (update===undefined) {
             input.latex("");
         }
+        scrollAt(node)
     }
-    document.getElementById("container").scrollTop = document.getElementById("refresh").offsetTop + 1000;
 }
 
 function respond(element, content, comment) {
     element.removeAttribute("id");
-    document.getElementById("math-input").value="";
-    let node = createMathField(content,comment);
+    input.latex("");
+    let target = element.nextElementSibling
+    let node = createMathField(content,comment,element);
     node.setAttribute("response","");
-
-    let target=element.nextElementSibling;
-
     if (target != null && "hasAttribute" in target && (target.hasAttribute("response") || target.getAttribute("math-content") == "")) {
         target.replaceWith(node)
-    } else {
-        insertAfter(node, element);
     }
-    let topPosition = node.offsetTop;
-    if (topPosition>document.getElementById("container").scrollTop) {
-        document.getElementById("container").scrollTop = topPosition+100;
-    }
+
+    scrollAt(node);
 }
 
 function setFocus(element) {
@@ -195,9 +200,18 @@ function setFocus(element) {
 
     input.latex(element.getAttribute("math-content"));
     input.focus();
-    let topPosition = document.getElementById("refresh").offsetTop;
-    if (topPosition>document.getElementById("container").scrollTop) {
-        document.getElementById("container").scrollTop = topPosition+100;
+    scrollAt(element)
+}
+
+function scrollAt(element) {
+    let topPosition = element.offsetTop-document.getElementById("container").clientHeight+element.clientHeight;
+
+    if (document.getElementById("container").scrollTop-topPosition>document.getElementById("container").clientHeight || document.getElementById("container").scrollTop-topPosition<0) {
+
+        document.getElementById("container").scrollTo({
+            top: topPosition,
+            behavior: 'smooth'
+        });
     }
 }
 
@@ -205,7 +219,7 @@ document.getElementById("math-input").addEventListener("keyup", function(event) 
     if (event.key === "Enter") {
         if (event.shiftKey) {
             event.preventDefault();
-            respond(document.getElementById("refresh"), calc(input.latex(),"run"));
+            respond(document.getElementById("refresh"), calc(input.latex(),"eval"));
             input.latex("");
         } else {
             event.preventDefault();
