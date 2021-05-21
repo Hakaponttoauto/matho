@@ -34,12 +34,12 @@ function mathLatex(input) {
 function calc(input,alg) {
     switch(alg) {
         case "run":
-            return mathLatex(nerdamer.expand(latexMath(input)).evaluate().toString())
+            return mathLatex(nerdamer.expand(latexMath(input)).toString())
         case "eval":
             try {
                 return mexp.eval(nerdamer.expand(latexMath(input)).toString())
             } catch {
-                return mathLatex(nerdamer.expand(latexMath(input)).evaluate().toString())
+                return mathLatex(nerdamer.expand(latexMath(input)).toString())
             }
         case "factor":
             return mathLatex(nerdamer.factor(latexMath(input)).toString())

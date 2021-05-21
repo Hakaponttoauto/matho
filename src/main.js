@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const userDataPath = app.getPath('userData');
 
+//require("electron-reload")(__dirname)
 
 function set(setting,value) {
    let data={};
