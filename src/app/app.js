@@ -77,11 +77,11 @@ function formatAnswer(ans) {
 }
 
 function createElement(str) {
-    var div = document.createElement('div');
+    let div = document.createElement('div');
     div.innerHTML = str;
-    var container = document.createDocumentFragment();
-    for (var i=0; i < div.childNodes.length; i++) {
-        var node = div.childNodes[i].cloneNode(true);
+    let container = document.createDocumentFragment();
+    for (let i=0; i < div.childNodes.length; i++) {
+        let node = div.childNodes[i].cloneNode(true);
         container.appendChild(node);
     }
     return container;
